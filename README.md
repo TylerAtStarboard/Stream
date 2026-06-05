@@ -28,7 +28,7 @@ It doesn't include springs, tweens, component constructors, or any other UI-spec
 
 It does one thing — reactive state — and tries to provide a clean way to bind that state to Instances or anything else. If you need animation or a full UI framework, you won't find it here
 
-# Benchmarks
+### Benchmarks
 
 I don't include benchmarks to all the other popular reactive state libraries on Roblox, 
 because the goal of this library is not to compete with others
