@@ -12,7 +12,7 @@
 
 ## What is Stream?
 
-Stream is a simple reactive state library for Roblox that I built for my games, inspired by libraries like [Fusion](https://elttob.uk/Fusion/0.2/). It gives you **values** that hold state, **computeds** that derive from them automatically, and **scopes** that clean everything up when you're done. It also ships with a built-in [Iris](https://github.com/SirMallard/Iris) debugger for inspecting your reactive graph at runtime.
+Stream is a simple and small reactive state library for Roblox that I built for my games, inspired by libraries like [Fusion](https://elttob.uk/Fusion/0.2/). It gives you **values** that hold state, **computeds** that derive from them automatically, and **scopes** that clean everything up when you're done. It also ships with a built-in [Iris](https://github.com/SirMallard/Iris) debugger for inspecting your reactive graph at runtime.
 
 <div align="center">
 <img src="docs/debugger.png" alt="Stream Debugger" width="520">
@@ -20,18 +20,11 @@ Stream is a simple reactive state library for Roblox that I built for my games, 
 
 
 
-## What it's NOT
+## What Stream is not
 
-I don't enjoy creating UI entirely with code, so Stream is **not** a UI library. 
+Stream is **not** a UI library. I don't enjoy creating UI entirely in code, so it doesn't include springs, tweens, component constructors, or any other UI-specific tooling. It does one thing — reactive state — and tries to provide a clean way to bind that state to Instances or anything else. If you need animation or a full UI framework, pair Stream with whatever you already use for that.
 
-It doesn't include springs, tweens, component constructors, or any other UI-specific tooling. 
-
-It does one thing — reactive state — and tries to provide a clean way to bind that state to Instances or anything else. If you need animation or a full UI framework, you won't find it here
-
-### Benchmarks
-
-I don't include benchmarks to all the other popular reactive state libraries on Roblox, 
-because the goal of this library is not to compete with others
+I also don't intend to benchmark Stream against the libraries mentioned above — they serve different use cases with only some overlapping behavior. If someone wants to put one together, I'm happy to link it here.
 
 ## Quick Example
 
