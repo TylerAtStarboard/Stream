@@ -24,7 +24,11 @@ Stream is a simple and small reactive state library for Roblox that I built for 
 
 Stream is **not** a UI library. I don't enjoy creating UI entirely in code, so it doesn't include springs, tweens, component constructors, or any other UI-specific tooling. It does one thing — reactive state — and tries to provide a clean way to bind that state to Instances or anything else. If you need animation or a full UI framework, pair Stream with whatever you already use for that.
 
-I also don't intend to benchmark Stream against the libraries mentioned above, or compete with them — they serve different use cases with only some overlapping behavior.
+
+### "How does this compare to"
+I don't intend to benchmark Stream against the libraries mentioned above, or compete with them — they serve different use cases with only some overlapping behavior.
+
+
 ## Quick Example
 
 ```luau
