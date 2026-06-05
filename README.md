@@ -76,7 +76,7 @@ Download the latest `.rbxm` from [Releases](https://github.com/TylerAtStarboard/
 
 ### Example Place
 
-Open `StreamExamplePlace.rbxl` in Studio to see Stream in action with the debugger enabled.
+Open `StreamExamplePlace.rbxl` in Studio under the latest release, to see Stream in action with the debugger enabled.
 
 ## Documentation
 
