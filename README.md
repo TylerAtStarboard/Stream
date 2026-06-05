@@ -4,14 +4,17 @@
 
 **A reactive state library for Roblox**
 
-[Documentation](https://TylerAtStarboard.github.io/Stream
-) · [Example Place](StreamExamplePlace.rbxl)
+[Documentation](https://TylerAtStarboard.github.io/Stream) · [Releases](https://github.com/TylerAtStarboard/Stream/releases/latest)
 
 ---
 
 </div>
 
-Stream gives you **values** that hold state, **computeds** that derive from them automatically, and **scopes** that clean everything up when you're done. It also ships with a built-in [Iris](https://github.com/SirMallard/Iris) debugger for inspecting your reactive graph at runtime.
+## What is Stream?
+
+Stream is a simple reactive state library for Roblox, inspired by libraries like [Fusion](https://elttob.uk/Fusion/0.2/). It gives you **values** that hold state, **computeds** that derive from them automatically, and **scopes** that clean everything up when you're done. It also ships with a built-in [Iris](https://github.com/SirMallard/Iris) debugger for inspecting your reactive graph at runtime.
+
+Stream is **not** a UI library. It doesn't include springs, tweens, component constructors, or any other UI-specific tooling. It does one thing — reactive state — and provides a clean way to bind that state to Instances or anything else. If you need animation or a full UI framework, pair Stream with whatever you already use for that.
 
 <div align="center">
 <img src="docs/debugger.png" alt="Stream Debugger" width="520">
@@ -57,7 +60,7 @@ wally install
 
 ### GitHub Releases
 
-Download the latest `.rbxm` from [Releases](https://github.com/yourusername/stream/releases) and drop it into your project.
+Download the latest `.rbxm` from [Releases](https://github.com/TylerAtStarboard/Stream/releases/latest) and drop it into your project.
 
 ### Example Place
 
@@ -67,7 +70,7 @@ Open `StreamExamplePlace.rbxl` in Studio to see Stream in action with the debugg
 
 Full API reference, examples, and debugger guide:
 
-**[https://TylerAtStarboard.github.io/stream](https://yourusername.github.io/stream)**
+**[https://TylerAtStarboard.github.io/Stream](https://TylerAtStarboard.github.io/Stream)**
 
 ## License
 
