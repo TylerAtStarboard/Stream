@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Stream — A reactive state library for Roblox">
+<title>Stream — Reactive State Library for Roblox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:       #1a1a2e;
+  --bg-soft:  #1f1f35;
+  --bg-mute:  #252542;
+  --bg-code:  #16162a;
+  --border:   #2e2e52;
+  --text:     #d4d4e8;
+  --text-2:   #9999b8;
+  --text-3:   #6b6b8a;
+  --heading:  #ebebff;
+  --accent:   #7c8aff;
+  --accent-soft: rgba(124,138,255,0.12);
+  --accent-2: #5f6dee;
+  --green:    #6ac789;
+  --yellow:   #e2c56a;
+  --red:      #e85d6f;
+  --sidebar-w: 260px;
+  --content-w: 740px;
+  --nav-h: 56px;
+  --font: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 24px)}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent-2);text-decoration:underline}
+
+.topnav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(26,26,46,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:100;display:flex;align-items:center;padding:0 24px}
+.topnav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--heading);letter-spacing:-.3px}
+.topnav-logo .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.topnav-links{margin-left:auto;display:flex;gap:20px;font-size:14px;font-weight:500}
+.topnav-links a{color:var(--text-2);transition:color .15s}
+.topnav-links a:hover{color:var(--heading);text-decoration:none}
+.menu-toggle{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;margin-left:auto;padding:4px}
+
+.sidebar{position:fixed;top:var(--nav-h);left:0;bottom:0;width:var(--sidebar-w);overflow-y:auto;padding:20px 16px 40px 20px;border-right:1px solid var(--border);background:var(--bg);z-index:90;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.sidebar-group{margin-bottom:20px}
+.sidebar-group-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);padding:6px 10px;margin-bottom:2px}
+.sidebar-link{display:block;padding:5px 10px;border-radius:6px;font-size:13.5px;color:var(--text-2);transition:all .12s;line-height:1.5}
+.sidebar-link:hover{color:var(--heading);background:var(--accent-soft);text-decoration:none}
+.sidebar-link.active{color:var(--accent);background:var(--accent-soft);font-weight:500}
+
+.content-wrap{margin-left:var(--sidebar-w);padding-top:var(--nav-h)}
+.content{max-width:var(--content-w);margin:0 auto;padding:40px 32px 120px}
+
+h1{font-size:30px;font-weight:700;color:var(--heading);margin-bottom:16px;letter-spacing:-.5px;line-height:1.25}
+h2{font-size:22px;font-weight:600;color:var(--heading);margin-top:52px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);letter-spacing:-.3px;line-height:1.3}
+h3{font-size:17px;font-weight:600;color:var(--heading);margin-top:36px;margin-bottom:10px;letter-spacing:-.2px}
+h2 .anchor,h3 .anchor{color:var(--text-3);font-weight:400;margin-left:6px;opacity:0;transition:opacity .15s}
+h2:hover .anchor,h3:hover .anchor{opacity:1}
+p{margin-bottom:14px}
+ul,ol{padding-left:22px;margin-bottom:14px}
+li{margin-bottom:4px}
+strong{color:var(--heading);font-weight:600}
+hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;vertical-align:middle;margin-left:8px;letter-spacing:.3px}
+.badge-value{background:rgba(124,138,255,0.15);color:var(--accent)}
+.badge-computed{background:rgba(155,89,182,0.18);color:#c49be8}
+.badge-scope{background:rgba(232,169,74,0.18);color:#e8a94a}
+.badge-debug{background:rgba(106,199,137,0.18);color:var(--green)}
+.badge-helper{background:rgba(226,197,106,0.18);color:var(--yellow)}
+
+code{font-family:var(--mono);font-size:13px;background:var(--bg-mute);padding:2px 6px;border-radius:4px;color:#c8c8e8}
+pre{background:var(--bg-code);border:1px solid var(--border);border-radius:8px;padding:18px 20px;overflow-x:auto;margin-bottom:18px;line-height:1.65}
+pre code{background:none;padding:0;font-size:13.5px;color:#d4d4e8}
+.code-title{background:var(--bg-mute);border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;padding:8px 16px;font-size:12px;font-weight:500;color:var(--text-3);font-family:var(--mono);letter-spacing:.3px}
+.code-title + pre{border-radius:0 0 8px 8px;margin-top:0}
+
+.kw{color:#c792ea}
+.fn{color:#82aaff}
+.str{color:#c3e88d}
+.num{color:#f78c6c}
+.cm{color:#5c6b7f;font-style:italic}
+.op{color:#89ddff}
+.ty{color:#ffcb6b}
+
+.api-entry{margin-top:36px}
+.api-sig{background:var(--bg-code);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:14px;overflow-x:auto}
+.api-sig code{font-size:14px;background:none;padding:0}
+.api-section{margin-bottom:10px}
+.api-section-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--text-3);margin-bottom:6px}
+
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:18px;font-size:14px}
+.callout.warn{border-color:var(--yellow);background:rgba(226,197,106,0.08)}
+.callout.danger{border-color:var(--red);background:rgba(232,93,111,0.08)}
+.callout-title{font-weight:600;color:var(--heading);margin-bottom:4px;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+.callout.warn .callout-title{color:var(--yellow)}
+.callout.danger .callout-title{color:var(--red)}
+
+.hero{text-align:center;padding:48px 0 20px}
+.hero h1{font-size:42px;margin-bottom:8px;letter-spacing:-.8px;background:linear-gradient(135deg,#7c8aff 0%,#c49be8 50%,#6ac789 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .subtitle{font-size:17px;color:var(--text-2);margin-bottom:28px;font-weight:400}
+
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease}
+  .sidebar.open{transform:translateX(0)}
+  .content-wrap{margin-left:0}
+  .menu-toggle{display:block}
+  .topnav-links{display:none}
+  .content{padding:32px 20px 100px}
+  h1{font-size:26px}
+  h2{font-size:20px}
+}
+.doc-img{border-radius:8px;border:1px solid var(--border);max-width:100%;margin-bottom:18px;display:block}
+.doc-img-caption{font-size:13px;color:var(--text-3);margin-top:-12px;margin-bottom:18px;font-style:italic}
+.category-header{font-size:28px;font-weight:700;letter-spacing:-.4px;color:var(--heading);margin-top:72px;margin-bottom:-16px;padding:0}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-logo"><span class="dot"></span> Stream</div>
+  <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">☰</button>
+  <div class="topnav-links">
+    <a href="#overview">Docs</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Getting Started</div>
+    <a class="sidebar-link" href="#overview">Overview</a>
+    <a class="sidebar-link" href="#debugger">Debugger</a>
+    <a class="sidebar-link" href="#installation">Installation</a>
+    <a class="sidebar-link" href="#examples">Examples</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Core API</div>
+    <a class="sidebar-link" href="#stream-value">Stream.Value()</a>
+    <a class="sidebar-link" href="#stream-computed">Stream.Computed()</a>
+    <a class="sidebar-link" href="#stream-listen">Stream.Listen()</a>
+    <a class="sidebar-link" href="#stream-observe">Stream.Observe()</a>
+    <a class="sidebar-link" href="#stream-bind">Stream.Bind()</a>
+    <a class="sidebar-link" href="#stream-new">Stream.New()</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">StreamObject Methods</div>
+    <a class="sidebar-link" href="#streamvalue-get">StreamValue:get()</a>
+    <a class="sidebar-link" href="#streamvalue-set">StreamValue:set()</a>
+    <a class="sidebar-link" href="#streamvalue-destroy">StreamValue:Destroy()</a>
+    <a class="sidebar-link" href="#streamcomputed-get">StreamComputed:get()</a>
+    <a class="sidebar-link" href="#streamcomputed-destroy">StreamComputed:Destroy()</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Scope API</div>
+    <a class="sidebar-link" href="#stream-scope">Stream.Scope()</a>
+    <a class="sidebar-link" href="#scope-add">Scope:Add()</a>
+    <a class="sidebar-link" href="#scope-innerscope">Scope:InnerScope()</a>
+    <a class="sidebar-link" href="#scope-value">Scope:Value()</a>
+    <a class="sidebar-link" href="#scope-computed">Scope:Computed()</a>
+    <a class="sidebar-link" href="#scope-bind">Scope:Bind()</a>
+    <a class="sidebar-link" href="#scope-observe">Scope:Observe()</a>
+    <a class="sidebar-link" href="#scope-listen">Scope:Listen()</a>
+    <a class="sidebar-link" href="#scope-fromproperty">Scope:FromProperty()</a>
+    <a class="sidebar-link" href="#scope-fromvaluebase">Scope:FromValueBase()</a>
+    <a class="sidebar-link" href="#scope-fromattribute">Scope:FromAttribute()</a>
+    <a class="sidebar-link" href="#scope-destroy">Scope:Destroy()</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Utility</div>
+    <a class="sidebar-link" href="#bindtoinstanceproperty">BindToInstanceProperty()</a>
+    <a class="sidebar-link" href="#fromproperty">FromProperty()</a>
+    <a class="sidebar-link" href="#fromvaluebase">FromValueBase()</a>
+    <a class="sidebar-link" href="#fromattribute">FromAttribute()</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Helpers</div>
+    <a class="sidebar-link" href="#helpers">Event / Attribute / Changed</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Debug</div>
+    <a class="sidebar-link" href="#enabledebug">EnableDebug()</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Notes</div>
+    <a class="sidebar-link" href="#notes">Best Practices</a>
+  </div>
+</aside>
+
+<div class="content-wrap">
+<main class="content">
+
+<div class="hero">
+  <h1>Stream</h1>
+  <p class="subtitle">A reactive state library for Roblox</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ OVERVIEW ═══ -->
+<p class="category-header" style="margin-top:28px">Getting Started</p>
+<h2 id="overview">Overview <a class="anchor" href="#overview">#</a></h2>
+
+<p>Stream is a reactive state library for Roblox. It provides <strong>values</strong> that hold state, <strong>computed</strong> values that automatically derive from other state, <strong>listeners</strong> that react to changes, and <strong>scopes</strong> that manage these for easy cleanup. It also has a built-in debugger using <a href="https://github.com/SirMallard/Iris" target="_blank">Iris</a>.</p>
+
+<pre><code><span class="kw">local</span> Stream = <span class="fn">require</span>(game.ReplicatedStorage.Stream)
+
+<span class="kw">local</span> scope = Stream.<span class="fn">Scope</span>(<span class="str">"Demo"</span>, <span class="str">"Counter"</span>)
+
+<span class="cm">-- Values hold reactive state</span>
+<span class="kw">local</span> count = scope:<span class="fn">Value</span>(<span class="num">0</span>)
+
+<span class="cm">-- Computeds automatically re-evaluate when dependencies change</span>
+<span class="kw">local</span> doubled = scope:<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return</span> count:<span class="fn">get</span>() * <span class="num">2</span>
+<span class="kw">end</span>)
+
+<span class="cm">-- Listeners fire a callback whenever a value changes</span>
+scope:<span class="fn">Listen</span>(doubled, <span class="kw">function</span>(old, new)
+    <span class="fn">print</span>(<span class="str">"doubled:"</span>, old, <span class="str">"→"</span>, new)
+<span class="kw">end</span>)
+
+count:<span class="fn">set</span>(<span class="num">5</span>) <span class="cm">-- prints "doubled: 0 → 10"</span>
+
+<span class="cm">-- Destroy the scope to clean up everything</span>
+scope:<span class="fn">Destroy</span>()</code></pre>
+
+<div class="callout">
+  <div class="callout-title">Scopes handle cleanup for you</div>
+  The <a href="#stream-scope">Scope API</a> provides scoped versions of every core function (<code>scope:Value()</code>, <code>scope:Listen()</code>, etc.) that automatically clean up when the scope is destroyed. When using the top-level <code>Stream.*</code> functions directly, <strong>you</strong> are responsible for calling <code>:Destroy()</code> on values/computeds and calling the returned disconnect function from listeners, bindings, and observers.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ DEBUGGER ═══ -->
+<h2 id="debugger">Debugger <a class="anchor" href="#debugger">#</a></h2>
+
+<p>Stream includes a built-in visual debugger powered by <a href="https://github.com/SirMallard/Iris" target="_blank">Iris</a>. It gives you a live view of every value, computed, and scope in your game, with change history, dependency tracking, and leak detection.</p>
+
+<img src="debugger.png" alt="Stream debugger showing scopes, values and computeds" class="doc-img">
+
+<p>The debugger has two views:</p>
+<ul>
+  <li><strong>Scopes</strong> — shows all objects organized by their scope, with categories and item counts. Leaked objects (those whose scope was destroyed but weren't cleaned up) are highlighted in red.</li>
+  <li><strong>Flow</strong> — shows the reactive dependency graph. Values appear as roots, with their computed dependents nested as children. You can trace how data flows through your system.</li>
+</ul>
+<p>Clicking any object opens the <strong>Inspector</strong>, which shows the current value, update count, age, scope, dependencies, listeners, and a change history log.</p>
+
+<h3>Setup</h3>
+<p>Call <code>EnableDebug</code> immediately after requiring Stream, before any objects are created. Pass in an initialized <a href="https://github.com/SirMallard/Iris" target="_blank">Iris</a> instance.</p>
+
+<pre><code><span class="kw">local</span> Stream = <span class="fn">require</span>(game.ReplicatedStorage.Stream.StreamRuntime)
+<span class="kw">local</span> Iris = <span class="fn">require</span>(script.Iris)
+Iris.<span class="fn">Init</span>()
+
+<span class="kw">local</span> DebugWidget = Stream.<span class="fn">EnableDebug</span>(Iris)
+DebugWidget:<span class="fn">Open</span>()</code></pre>
+
+<h3>Variable names</h3>
+<p>By default, objects are labeled by their source file and line number. For nicer labels like <code>PlayerCharacterStates.IsSprinting</code>, run the <code>GenerateVariableNames</code> script in Studio's command bar. It parses your scripts and maps line numbers to variable names, outputting a <code>StreamDebug_VariableNames</code> ModuleScript that the debugger reads automatically.</p>
+
+<div class="callout">
+  <div class="callout-title">Note</div>
+  Set the <code>COMMITTED_SOURCE_ONLY</code> setting at the top of the command-bar script to control whether it reads from committed source (<code>.Source</code>) or the current editor source (<code>ScriptEditorService:GetEditorSource</code>). Use editor source if you want names to update without committing your changes first.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ INSTALLATION ═══ -->
+<h2 id="installation">Installation <a class="anchor" href="#installation">#</a></h2>
+
+<p>Place the <code>StreamRuntime</code> ModuleScript in <code>ReplicatedStorage</code> (or wherever your shared modules live) and require it:</p>
+
+<pre><code><span class="kw">local</span> Stream = <span class="fn">require</span>(game.ReplicatedStorage.Stream.StreamRuntime)</code></pre>
+
+<p>For the debug tools, <a href="https://github.com/SirMallard/Iris" target="_blank">Iris</a> is required as an external dependency. See <a href="#enabledebug">EnableDebug</a>.</p>
+
+
+<!-- ═══════════════════════════════════════════════ EXAMPLES ═══ -->
+<h2 id="examples">Examples <a class="anchor" href="#examples">#</a></h2>
+
+<h3>Reactive game state</h3>
+<p>A common pattern is a module that exposes reactive state for other systems to read. Set a <code>Value</code>, and any <code>Computed</code> that depends on it re-evaluates automatically.</p>
+
+<pre><code><span class="kw">local</span> Stream = <span class="fn">require</span>(game.ReplicatedStorage.Stream)
+
+<span class="kw">local</span> GameState = {
+    CameraEnabled = Stream.<span class="fn">Value</span>(<span class="kw">true</span>),
+}
+
+<span class="cm">-- Other modules can derive from this without polling</span>
+GameState.NotCameraEnabled = Stream.<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return not</span> GameState.CameraEnabled:<span class="fn">get</span>()
+<span class="kw">end</span>)
+
+<span class="kw">return</span> GameState</code></pre>
+
+<p>Anywhere else in your codebase, reading <code>GameState.CameraEnabled:get()</code> inside a <code>Computed</code> or <code>Observe</code> will automatically subscribe to updates — no manual wiring needed.</p>
+
+<h3>Binding to Instances</h3>
+<p>Use <code>Bind</code> to drive Instance properties directly from reactive state. When the state changes, the property updates automatically.</p>
+
+<pre><code><span class="kw">local</span> scope = Stream.<span class="fn">Scope</span>(<span class="str">"PlayerCharacter"</span>, <span class="str">"Camera"</span>)
+
+<span class="kw">local</span> autoRotate = scope:<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return</span> GameState.NotCameraEnabled:<span class="fn">get</span>()
+<span class="kw">end</span>)
+
+<span class="cm">-- Humanoid.AutoRotate stays in sync with the computed</span>
+scope:<span class="fn">Bind</span>(humanoid){
+    AutoRotate = autoRotate,
+}
+
+<span class="cm">-- Head transparency follows camera state</span>
+<span class="kw">local</span> headTransparency = scope:<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return if</span> GameState.CameraEnabled:<span class="fn">get</span>() <span class="kw">then</span> <span class="num">1</span> <span class="kw">else</span> <span class="num">0</span>
+<span class="kw">end</span>)
+
+scope:<span class="fn">Bind</span>(head){
+    Transparency = headTransparency,
+}</code></pre>
+
+<h3>Scoped game objects</h3>
+<p>Tie a scope's lifetime to a game object. When the object is cleaned up, everything in the scope — values, computeds, listeners, connections — is destroyed automatically.</p>
+
+<pre><code><span class="kw">local function</span> <span class="fn">setupDoor</span>(doorModel)
+    <span class="kw">local</span> scope = Stream.<span class="fn">Scope</span>(<span class="str">"Door"</span>)
+    <span class="kw">local</span> isOpen = scope:<span class="fn">Value</span>(<span class="kw">false</span>)
+
+    <span class="cm">-- Observe runs immediately, then on every change</span>
+    <span class="cm">-- The returned cleanup runs before the next call</span>
+    scope:<span class="fn">Observe</span>(isOpen, <span class="kw">function</span>(open)
+        <span class="kw">if</span> open <span class="kw">then</span>
+            playSound(<span class="str">"Door.Open"</span>)
+            animateOpen(doorModel)
+        <span class="kw">else</span>
+            playSound(<span class="str">"Door.Close"</span>)
+            animateClosed(doorModel)
+        <span class="kw">end</span>
+    <span class="kw">end</span>)
+
+    <span class="cm">-- Bind the prompt text to the door state</span>
+    scope:<span class="fn">Observe</span>(isOpen, <span class="kw">function</span>(open)
+        prompt:SetAttribute(<span class="str">"ActionText"</span>,
+            <span class="kw">if</span> open <span class="kw">then</span> <span class="str">"Close"</span> <span class="kw">else</span> <span class="str">"Open"</span>)
+    <span class="kw">end</span>)
+
+    <span class="kw">return</span> scope <span class="cm">-- caller destroys when door is removed</span>
+<span class="kw">end</span></code></pre>
+
+
+<!-- ═══════════════════════════════════════════════ CORE API ═══ -->
+<p class="category-header">Core API</p>
+<h2 id="stream-value">Stream.Value() <span class="badge badge-value">VALUE</span> <a class="anchor" href="#stream-value">#</a></h2>
+
+<p>Creates a <code>StreamValue</code> — a reactive container that holds a single value and notifies listeners whenever it changes.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Value</span>(value: <span class="ty">any</span>): <span class="ty">StreamValue</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>The returned <code>StreamValue</code> has no dependencies. It is a root-level piece of state you update manually via <a href="#streamvalue-set"><code>:set()</code></a>. Listeners are notified on the next deferred batch.</p>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code><span class="kw">local</span> counter = Stream.<span class="fn">Value</span>(<span class="num">0</span>)
+counter:<span class="fn">set</span>(<span class="num">10</span>)
+<span class="fn">print</span>(counter:<span class="fn">get</span>()) <span class="cm">-- 10</span></code></pre>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  You must call <code>:Destroy()</code> when you're done with an unscoped value, or it will leak. Use <a href="#scope-value"><code>scope:Value()</code></a> for automatic cleanup.
+</div>
+
+
+<!-- ── Stream.Computed ── -->
+<h2 id="stream-computed">Stream.Computed() <span class="badge badge-computed">COMPUTED</span> <a class="anchor" href="#stream-computed">#</a></h2>
+
+<p>Creates a <code>StreamComputedValue</code>. Its value is derived from other stream objects and automatically re-computed when its dependencies change.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Computed</span>(callback: () <span class="op">-></span> <span class="ty">any</span>): <span class="ty">StreamComputedValue</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>Dependencies are tracked automatically — any <code>StreamValue</code> or <code>StreamComputedValue</code> read via <code>:get()</code> inside the callback is registered as a dependency. When a dependency changes, the callback re-runs and the computed value updates. If the computed value itself changed, its own listeners are notified.</p>
+  <p>The callback is evaluated once immediately upon creation.</p>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code><span class="kw">local</span> count = Stream.<span class="fn">Value</span>(<span class="num">10</span>)
+<span class="kw">local</span> doubled = Stream.<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return</span> count:<span class="fn">get</span>() * <span class="num">2</span>
+<span class="kw">end</span>)
+
+<span class="fn">print</span>(doubled:<span class="fn">get</span>()) <span class="cm">-- 20</span>
+count:<span class="fn">set</span>(<span class="num">20</span>)
+<span class="cm">-- doubled will recompute to 40</span></code></pre>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  You must call <code>:Destroy()</code> when you're done with an unscoped computed, or it will leak. Use <a href="#scope-computed"><code>scope:Computed()</code></a> for automatic cleanup.
+</div>
+
+<div class="callout danger">
+  <div class="callout-title">Warning</div>
+  Do not create a <code>Stream.Computed</code> inside another Computed's callback. This is unsupported and will lead to unexpected behavior.
+</div>
+
+
+<!-- ── Stream.Listen ── -->
+<h2 id="stream-listen">Stream.Listen() <a class="anchor" href="#stream-listen">#</a></h2>
+
+<p>Creates a listener that fires a callback whenever a stream value changes. Can also be used with Instances or tables to bind to property, attribute, and event changes.</p>
+
+<div class="api-section">
+  <div class="api-section-label">Stream listener</div>
+  <div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Listen</span>(
+    target: <span class="ty">StreamObject</span>,
+    callback: (<span class="ty">any</span>, <span class="ty">any</span>) <span class="op">-></span> ()
+): <span class="ty">Disconnect</span></code></div>
+  <p>The callback receives <code>(oldValue, newValue)</code> each time the value changes.</p>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Instance / table bind listener</div>
+  <div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Listen</span>(
+    target: <span class="ty">Instance</span> | <span class="ty">table</span>
+): (propertiesTable) <span class="op">-></span> <span class="ty">Disconnect</span></code></div>
+  <p>Returns a curried function that accepts a properties table — behaving like <a href="#stream-bind"><code>Stream.Bind</code></a> but connecting change listeners instead of setting properties. Use <code>Changed_</code>, <code>Attribute_</code>, and <code>Event_</code> prefixed keys for Instance targets.</p>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  The returned disconnect function must be called when you're done, or the listener will leak. Use <a href="#scope-listen"><code>scope:Listen()</code></a> for automatic cleanup.
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Examples</div>
+<div class="code-title">Stream listener</div>
+<pre><code><span class="kw">local</span> counter = Stream.<span class="fn">Value</span>(<span class="num">0</span>)
+<span class="kw">local</span> disconnect = Stream.<span class="fn">Listen</span>(counter, <span class="kw">function</span>(old, new)
+    <span class="fn">print</span>(old, new)
+<span class="kw">end</span>)
+counter:<span class="fn">set</span>(<span class="num">10</span>) <span class="cm">-- prints "0 10"</span>
+
+disconnect() <span class="cm">-- stop listening</span></code></pre>
+
+<div class="code-title">Instance bind listener</div>
+<pre><code><span class="kw">local</span> disconnect = Stream.<span class="fn">Listen</span>(workspace){
+    <span class="ty">Changed_AirDensity</span> = <span class="kw">function</span>(old, new) <span class="kw">end</span>,
+    <span class="ty">Attribute_SomeAttribute</span> = <span class="kw">function</span>(old, new) <span class="kw">end</span>,
+}</code></pre>
+</div>
+
+
+<!-- ── Stream.Observe ── -->
+<h2 id="stream-observe">Stream.Observe() <a class="anchor" href="#stream-observe">#</a></h2>
+
+<p>Runs a callback immediately with the current value, then re-runs it whenever the value changes. The callback may return a cleanup function.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Observe</span>(
+    target: <span class="ty">StreamObject</span>,
+    callback: (<span class="ty">any</span>) <span class="op">-></span> <span class="ty">Disconnect?</span>
+): <span class="ty">Disconnect</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>Unlike <code>Listen</code>, the callback receives only the <strong>new value</strong> (not the old). It is called once immediately with the current value. If the callback returns a function, that function is called as cleanup before the next re-run and when disconnected.</p>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  The returned disconnect function must be called when you're done. Use <a href="#scope-observe"><code>scope:Observe()</code></a> for automatic cleanup.
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code><span class="kw">local</span> state = Stream.<span class="fn">Value</span>(<span class="str">"Idle"</span>)
+<span class="kw">local</span> disconnect = Stream.<span class="fn">Observe</span>(state, <span class="kw">function</span>(newVal)
+    <span class="fn">print</span>(<span class="str">"New value"</span>, newVal)
+    <span class="kw">return function</span>()
+        <span class="fn">print</span>(<span class="str">"No longer"</span>, newVal)
+    <span class="kw">end</span>
+<span class="kw">end</span>)
+<span class="cm">-- Prints "New value Idle"</span>
+
+state:<span class="fn">set</span>(<span class="str">"Running"</span>)
+<span class="cm">-- Prints "No longer Idle", then "New value Running"</span></code></pre>
+</div>
+
+
+<!-- ── Stream.Bind ── -->
+<h2 id="stream-bind">Stream.Bind() <a class="anchor" href="#stream-bind">#</a></h2>
+
+<p>Binds properties of an Instance or table to stream values. When a bound stream changes, the target's property is automatically updated.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Bind</span>(
+    target: <span class="ty">Instance</span> | <span class="ty">table</span>
+): (propertiesTable) <span class="op">-></span> <span class="ty">Disconnect</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>Returns a curried function. Call it with a table mapping property names to stream values (or static values). For Instance targets, use prefixed keys to connect to events, attribute changes, and property changes:</p>
+  <ul>
+    <li><code>Event_&lt;name&gt;</code> — connects to <code>target[name]:Connect(callback)</code></li>
+    <li><code>Attribute_&lt;name&gt;</code> — listens for attribute changes, fires <code>(oldValue, newValue)</code></li>
+    <li><code>Changed_&lt;name&gt;</code> — listens for property changes, fires <code>(oldValue, newValue)</code></li>
+  </ul>
+  <p>Properties set to a <code>StreamValue</code> or <code>StreamComputedValue</code> are applied immediately and updated whenever the stream changes. Static values are applied once.</p>
+</div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  The returned disconnect function must be called when you're done. Use <a href="#scope-bind"><code>scope:Bind()</code></a> for automatic cleanup.
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Examples</div>
+<div class="code-title">Table binding</div>
+<pre><code><span class="kw">local</span> myTable = { score = <span class="num">0</span> }
+<span class="kw">local</span> counter = Stream.<span class="fn">Value</span>(<span class="num">10</span>)
+<span class="kw">local</span> disconnect = Stream.<span class="fn">Bind</span>(myTable){
+    score = counter
+}
+counter:<span class="fn">set</span>(<span class="num">20</span>)
+<span class="fn">print</span>(myTable.score) <span class="cm">-- 20</span></code></pre>
+
+<div class="code-title">Instance binding</div>
+<pre><code><span class="kw">local</span> disconnect = Stream.<span class="fn">Bind</span>(myPart){
+    Transparency = Stream.<span class="fn">Value</span>(<span class="num">0.5</span>),
+    [Stream.Changed.Color] = <span class="kw">function</span>(old, new) <span class="kw">end</span>,
+    [Stream.Attribute.Health] = <span class="kw">function</span>(old, new) <span class="kw">end</span>,
+    [Stream.Event.Touched] = <span class="kw">function</span>(hit) <span class="kw">end</span>,
+}</code></pre>
+</div>
+
+
+<!-- ── Stream.New ── -->
+<h2 id="stream-new">Stream.New() <a class="anchor" href="#stream-new">#</a></h2>
+
+<p>Creates a new Instance (or custom object) and binds properties to it in one step.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">New</span>(
+    className: <span class="ty">string</span>,
+    parent: <span class="ty">Instance?</span>
+): (propertiesTable) <span class="op">-></span> (<span class="ty">Instance</span>, <span class="ty">Disconnect</span>)
+
+<span class="kw">function</span> Stream.<span class="fn">New</span>(
+    constructor: <span class="ty">function</span>,
+    <span class="op">...</span>
+): (propertiesTable) <span class="op">-></span> (<span class="ty">table</span>, <span class="ty">Disconnect</span>)</code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>The first argument is either a Roblox class name string or a constructor function. Additional arguments are forwarded. Returns a curried function that accepts a properties table (same format as <code>Stream.Bind</code>) and returns the instance plus a cleanup function.</p>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code><span class="kw">local</span> label, cleanup = Stream.<span class="fn">New</span>(<span class="str">"TextLabel"</span>, parentInstance)({
+    Text = Stream.<span class="fn">Value</span>(<span class="str">"Hello, World!"</span>)
+})</code></pre>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ STREAMOBJECT METHODS ═══ -->
+<p class="category-header">StreamObject Methods</p>
+<h2 id="streamvalue-get">StreamValue:get() <span class="badge badge-value">VALUE</span> <a class="anchor" href="#streamvalue-get">#</a></h2>
+
+<p>Returns the current value. If called inside a <code>Computed</code> callback, registers this value as a dependency.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> StreamValue:<span class="fn">get</span>(): <span class="ty">any</span></code></div>
+
+
+<h2 id="streamvalue-set">StreamValue:set() <span class="badge badge-value">VALUE</span> <a class="anchor" href="#streamvalue-set">#</a></h2>
+
+<p>Sets the value. If the value changed, listeners are notified on the next deferred batch.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> StreamValue:<span class="fn">set</span>(value: <span class="ty">any</span>)</code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>Uses <code>~=</code> for equality checking. If the new value is the same as the current value, no notification is triggered. The internal value is updated immediately but listener callbacks are deferred via <code>task.defer</code>, allowing multiple <code>:set()</code> calls within the same frame to be coalesced into a single notification pass.</p>
+</div>
+
+
+<h2 id="streamvalue-destroy">StreamValue:Destroy() <span class="badge badge-value">VALUE</span> <a class="anchor" href="#streamvalue-destroy">#</a></h2>
+
+<p>Cleans up the value: disconnects all listeners, removes from pending changes, and severs dependency links.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> StreamValue:<span class="fn">Destroy</span>()</code></div>
+
+
+<h2 id="streamcomputed-get">StreamComputedValue:get() <span class="badge badge-computed">COMPUTED</span> <a class="anchor" href="#streamcomputed-get">#</a></h2>
+
+<p>Returns the current computed value. If called inside another <code>Computed</code>, registers as a dependency.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> StreamComputedValue:<span class="fn">get</span>(): <span class="ty">any</span></code></div>
+
+
+<h2 id="streamcomputed-destroy">StreamComputedValue:Destroy() <span class="badge badge-computed">COMPUTED</span> <a class="anchor" href="#streamcomputed-destroy">#</a></h2>
+
+<p>Unsubscribes from all dependencies, cleans up all listeners, and removes from pending changes.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> StreamComputedValue:<span class="fn">Destroy</span>()</code></div>
+
+
+<!-- ═══════════════════════════════════════════════ SCOPE API ═══ -->
+<p class="category-header">Scope API</p>
+<h2 id="stream-scope">Stream.Scope() <span class="badge badge-scope">SCOPE</span> <a class="anchor" href="#stream-scope">#</a></h2>
+
+<p>Creates a new scope for managing the lifetime of stream objects and other cleanable items. When destroyed, all items are cleaned up in reverse order.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">Scope</span>(
+    category: <span class="ty">string?</span>,
+    displayName: <span class="ty">string?</span>
+): <span class="ty">StreamScope</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>The optional <code>category</code> and <code>displayName</code> are used by the debugger to organize and label scopes. A scope can hold any combination of stream objects, connections, instances, threads, functions, or tables with <code>Destroy</code>/<code>Disconnect</code> methods.</p>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code><span class="kw">local</span> scope = Stream.<span class="fn">Scope</span>(<span class="str">"UI"</span>, <span class="str">"HealthBar"</span>)
+<span class="kw">local</span> hp = scope:<span class="fn">Value</span>(<span class="num">100</span>)
+<span class="kw">local</span> label = scope:<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return</span> hp:<span class="fn">get</span>() .. <span class="str">" HP"</span>
+<span class="kw">end</span>)
+
+scope:<span class="fn">Destroy</span>() <span class="cm">-- Cleans up label first, then hp</span></code></pre>
+</div>
+
+
+<h3 id="scope-add">Scope:Add() <a class="anchor" href="#scope-add">#</a></h3>
+<p>Adds any cleanable item to the scope. Returns the item for inline use.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Add</span>&lt;T&gt;(item: <span class="ty">T</span>): <span class="ty">T</span></code></div>
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>Accepted item types: functions (called on cleanup), <code>RBXScriptConnection</code> (disconnected), <code>Instance</code> (destroyed), threads (cancelled), or tables with <code>Destroy</code>/<code>Disconnect</code> methods.</p>
+</div>
+<pre><code>scope:<span class="fn">Add</span>(workspace.ChildAdded:<span class="fn">Connect</span>(<span class="kw">function</span>(child)
+    <span class="fn">print</span>(child.Name)
+<span class="kw">end</span>))
+
+scope:<span class="fn">Add</span>(<span class="kw">function</span>()
+    <span class="fn">print</span>(<span class="str">"Scope destroyed!"</span>)
+<span class="kw">end</span>)</code></pre>
+
+
+<h3 id="scope-innerscope">Scope:InnerScope() <a class="anchor" href="#scope-innerscope">#</a></h3>
+<p>Creates a child scope owned by this scope. Destroyed automatically when the parent is destroyed.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">InnerScope</span>(category: <span class="ty">string?</span>, displayName: <span class="ty">string?</span>): <span class="ty">StreamScope</span></code></div>
+
+
+<h3 id="scope-value">Scope:Value() <a class="anchor" href="#scope-value">#</a></h3>
+<p>Shorthand for <code>scope:Add(Stream.Value(value))</code>.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Value</span>(value: <span class="ty">any</span>): <span class="ty">StreamValue</span></code></div>
+
+
+<h3 id="scope-computed">Scope:Computed() <a class="anchor" href="#scope-computed">#</a></h3>
+<p>Shorthand for <code>scope:Add(Stream.Computed(callback))</code>.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Computed</span>(callback: () <span class="op">-></span> <span class="ty">any</span>): <span class="ty">StreamComputedValue</span></code></div>
+
+
+<h3 id="scope-bind">Scope:Bind() <a class="anchor" href="#scope-bind">#</a></h3>
+<p>Returns a curried bind function whose cleanup is added to the scope.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Bind</span>(target: <span class="ty">Instance</span> | <span class="ty">table</span>): (propertiesTable) <span class="op">-></span> <span class="ty">Disconnect</span></code></div>
+
+
+<h3 id="scope-observe">Scope:Observe() <a class="anchor" href="#scope-observe">#</a></h3>
+<p>Shorthand for <code>scope:Add(Stream.Observe(target, callback))</code>.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Observe</span>(target: <span class="ty">StreamObject</span>, callback: (<span class="ty">any</span>) <span class="op">-></span> <span class="ty">Disconnect?</span>): <span class="ty">Disconnect</span></code></div>
+
+
+<h3 id="scope-listen">Scope:Listen() <a class="anchor" href="#scope-listen">#</a></h3>
+<p>If <code>args</code> is provided, shorthand for <code>scope:Add(Stream.Listen(target, args))</code>. If <code>args</code> is nil, returns a curried bind-listen function whose cleanup is added to the scope.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Listen</span>(
+    target: <span class="ty">StreamObject</span>,
+    callback: (<span class="ty">any</span>, <span class="ty">any</span>) <span class="op">-></span> ()
+): <span class="ty">Disconnect</span>
+
+<span class="kw">function</span> StreamScope:<span class="fn">Listen</span>(
+    target: <span class="ty">Instance</span> | <span class="ty">table</span>
+): (propertiesTable) <span class="op">-></span> <span class="ty">Disconnect</span></code></div>
+
+
+<h3 id="scope-fromproperty">Scope:FromProperty() <a class="anchor" href="#scope-fromproperty">#</a></h3>
+<p>Creates and owns a <code>StreamValue</code> bound to an Instance property. The stream updates when the property changes.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">FromProperty</span>(instance: <span class="ty">Instance</span>, prop: <span class="ty">string</span>): <span class="ty">StreamValue</span></code></div>
+
+
+<h3 id="scope-fromvaluebase">Scope:FromValueBase() <a class="anchor" href="#scope-fromvaluebase">#</a></h3>
+<p>Creates and owns a <code>StreamValue</code> bound to a <code>ValueBase</code> (IntValue, StringValue, etc.).</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">FromValueBase</span>(valueBase: <span class="ty">ValueBase</span>): <span class="ty">StreamValue</span></code></div>
+
+
+<h3 id="scope-fromattribute">Scope:FromAttribute() <a class="anchor" href="#scope-fromattribute">#</a></h3>
+<p>Creates and owns a <code>StreamValue</code> bound to an Instance attribute. Optional callback fires on changes and once immediately with <code>(nil, currentValue)</code>.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">FromAttribute</span>(
+    instance: <span class="ty">Instance</span>,
+    attributeName: <span class="ty">string</span>,
+    callback: <span class="ty">ChangeCallback?</span>
+): <span class="ty">StreamValue</span></code></div>
+
+<pre><code><span class="kw">local</span> health = scope:<span class="fn">FromAttribute</span>(part, <span class="str">"Health"</span>, <span class="kw">function</span>(old, new)
+    <span class="fn">print</span>(<span class="str">"Health:"</span>, old, <span class="str">"->"</span>, new)
+<span class="kw">end</span>)</code></pre>
+
+
+<h3 id="scope-destroy">Scope:Destroy() <a class="anchor" href="#scope-destroy">#</a></h3>
+<p>Destroys all items in the scope in reverse order. Safe to call multiple times.</p>
+<div class="api-sig"><code><span class="kw">function</span> StreamScope:<span class="fn">Destroy</span>()</code></div>
+<div class="callout">
+  <div class="callout-title">Cleanup order</div>
+  Items are cleaned up in reverse insertion order (LIFO). This ensures that dependents are cleaned up before their dependencies.
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ UTILITY ═══ -->
+<p class="category-header">Utility</p>
+<h2 id="bindtoinstanceproperty">Stream.BindToInstanceProperty() <a class="anchor" href="#bindtoinstanceproperty">#</a></h2>
+
+<p>Binds an Instance property to a <code>StreamValue</code> so that whenever the property changes on the Instance, the stream is updated via <code>:set()</code>.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">BindToInstanceProperty</span>(
+    stateObject: <span class="ty">StreamValue</span>,
+    instance: <span class="ty">Instance</span>,
+    prop: <span class="ty">string</span>
+): <span class="ty">Disconnect</span></code></div>
+
+<pre><code><span class="kw">local</span> transparency = Stream.<span class="fn">Value</span>(part.Transparency)
+<span class="kw">local</span> disconnect = Stream.<span class="fn">BindToInstanceProperty</span>(transparency, part, <span class="str">"Transparency"</span>)</code></pre>
+
+
+<h2 id="fromproperty">Stream.FromProperty() <a class="anchor" href="#fromproperty">#</a></h2>
+
+<p>Creates a <code>StreamValue</code> initialized to the current value of an Instance property and bound to its property changed signal.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">FromProperty</span>(
+    instance: <span class="ty">Instance</span>,
+    prop: <span class="ty">string</span>
+): (<span class="ty">StreamValue</span>, <span class="ty">Disconnect</span>)</code></div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  You must call the returned disconnect function and <code>:Destroy()</code> the StreamValue when done. Use <a href="#scope-fromproperty"><code>scope:FromProperty()</code></a> for automatic cleanup.
+</div>
+
+<pre><code><span class="kw">local</span> transparency, disconnect = Stream.<span class="fn">FromProperty</span>(part, <span class="str">"Transparency"</span>)</code></pre>
+
+
+<h2 id="fromvaluebase">Stream.FromValueBase() <a class="anchor" href="#fromvaluebase">#</a></h2>
+
+<p>Creates a <code>StreamValue</code> from a Roblox <code>ValueBase</code> (IntValue, StringValue, etc.) and binds its <code>.Value</code> property.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">FromValueBase</span>(
+    valueBase: <span class="ty">ValueBase</span>
+): (<span class="ty">StreamValue</span>, <span class="ty">Disconnect</span>)</code></div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  You must call the returned disconnect function and <code>:Destroy()</code> the StreamValue when done. Use <a href="#scope-fromvaluebase"><code>scope:FromValueBase()</code></a> for automatic cleanup.
+</div>
+
+<pre><code><span class="kw">local</span> stream, disconnect = Stream.<span class="fn">FromValueBase</span>(workspace.MyIntValue)</code></pre>
+
+
+<h2 id="fromattribute">Stream.FromAttribute() <a class="anchor" href="#fromattribute">#</a></h2>
+
+<p>Creates a <code>StreamValue</code> from an Instance attribute. Optional callback fires on changes and once immediately with <code>(nil, currentValue)</code>.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">FromAttribute</span>(
+    instance: <span class="ty">Instance</span>,
+    attributeName: <span class="ty">string</span>,
+    callback: <span class="ty">ChangeCallback?</span>
+): (<span class="ty">StreamValue</span>, <span class="ty">Disconnect</span>)</code></div>
+
+<div class="callout warn">
+  <div class="callout-title">Manual cleanup required</div>
+  You must call the returned disconnect function and <code>:Destroy()</code> the StreamValue when done. Use <a href="#scope-fromattribute"><code>scope:FromAttribute()</code></a> for automatic cleanup.
+</div>
+
+<pre><code><span class="kw">local</span> stream, disconnect = Stream.<span class="fn">FromAttribute</span>(part, <span class="str">"Health"</span>, <span class="kw">function</span>(old, new)
+    <span class="fn">print</span>(<span class="str">"Health changed:"</span>, old, <span class="str">"->"</span>, new)
+<span class="kw">end</span>)</code></pre>
+
+
+<!-- ═══════════════════════════════════════════════ HELPERS ═══ -->
+<p class="category-header">Helpers</p>
+<h2 id="helpers">Helpers <span class="badge badge-helper">HELPER</span> <a class="anchor" href="#helpers">#</a></h2>
+
+<p>Key-name helpers for use in <code>Bind</code> and <code>Listen</code> properties tables. These use metatables to produce prefixed string keys.</p>
+
+<div class="api-sig"><code>Stream.Event[name]     <span class="cm">-- produces "Event_&lt;name&gt;"</span>
+Stream.Attribute[name] <span class="cm">-- produces "Attribute_&lt;name&gt;"</span>
+Stream.Changed[name]   <span class="cm">-- produces "Changed_&lt;name&gt;"</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code>Stream.<span class="fn">Bind</span>(myPart){
+    [Stream.Event.Touched] = <span class="kw">function</span>(hit) <span class="kw">end</span>,
+    [Stream.Attribute.Health] = <span class="kw">function</span>(old, new) <span class="kw">end</span>,
+    [Stream.Changed.Transparency] = <span class="kw">function</span>(old, new) <span class="kw">end</span>,
+}</code></pre>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ DEBUG ═══ -->
+<p class="category-header">Debug</p>
+<h2 id="enabledebug">Stream.EnableDebug() <span class="badge badge-debug">DEBUG</span> <a class="anchor" href="#enabledebug">#</a></h2>
+
+<p>Enables the debug explorer with change logging, dependency tracking, etc.</p>
+
+<div class="api-sig"><code><span class="kw">function</span> Stream.<span class="fn">EnableDebug</span>(Iris: <span class="ty">any</span>): <span class="ty">DebugWidget?</span></code></div>
+
+<div class="api-section">
+  <div class="api-section-label">Details</div>
+  <p>Must be called <strong>immediately</strong> after requiring Stream, before any objects are created. Requires <a href="https://github.com/SirMallard/Iris" target="_blank">Iris</a> as an external dependency — pass the initialized Iris instance as the first argument.</p>
+  <p>When debug is disabled (the default), there is zero debug overhead. The debug module (<code>StreamDebug</code>) must exist as a child of the Stream runtime script.</p>
+  <p>Returns a <code>DebugWidget</code> with <code>:Open()</code> and <code>:Close()</code> methods, or <code>nil</code> if debug was already enabled.</p>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Example</div>
+<pre><code><span class="kw">local</span> Stream = <span class="fn">require</span>(game.ReplicatedStorage.Stream.StreamRuntime)
+
+<span class="cm">-- Iris is an external dependency</span>
+<span class="kw">local</span> Iris = <span class="fn">require</span>(script.Iris)
+Iris.<span class="fn">Init</span>()
+
+<span class="kw">local</span> DebugWidget = Stream.<span class="fn">EnableDebug</span>(Iris)
+DebugWidget:<span class="fn">Open</span>()</code></pre>
+</div>
+
+<div class="api-section">
+  <div class="api-section-label">Variable names</div>
+  <p>For the debugger to display variable names instead of line numbers, run the <code>GenerateVariableNames</code> command-bar script in Studio. It parses all scripts for Stream object creation calls and maps line numbers to variable names, outputting a <code>StreamDebug_VariableNames</code> ModuleScript.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ NOTES ═══ -->
+<p class="category-header">Notes</p>
+<h2 id="notes">Notes <a class="anchor" href="#notes">#</a></h2>
+
+<h3>Dependency flow</h3>
+<p>Dependencies should flow downward. A stream's dependencies should live at least as long as it does. A short-lived scope reading from a long-lived scope is safe; the reverse may cause the dependent to go stale.</p>
+
+<pre><code><span class="cm">-- ✓ Safe: short-lived scope reads long-lived state</span>
+<span class="kw">local</span> appState = Stream.<span class="fn">Value</span>(<span class="str">"idle"</span>)
+
+<span class="kw">local</span> uiScope = Stream.<span class="fn">Scope</span>(<span class="str">"UI"</span>, <span class="str">"Panel"</span>)
+<span class="kw">local</span> label = uiScope:<span class="fn">Computed</span>(<span class="kw">function</span>()
+    <span class="kw">return</span> <span class="str">"State: "</span> .. appState:<span class="fn">get</span>()
+<span class="kw">end</span>)
+uiScope:<span class="fn">Destroy</span>() <span class="cm">-- appState is unaffected</span></code></pre>
+
+<h3>Computed nesting</h3>
+<p>Do not create <code>Stream.Computed</code> inside another Computed's callback. Each computed should be declared at scope level.</p>
+
+<h3>Circular dependencies</h3>
+<p>Circular dependencies (<code>A → B → A</code>) are detected at runtime after 100 cascading updates and will throw an error with diagnostic information listing the involved objects.</p>
+
+<h3>Deferred batching</h3>
+<p>All change notifications are deferred via <code>task.defer</code>. Multiple <code>:set()</code> calls within the same frame are coalesced into a single notification pass. This means <code>:get()</code> returns the new value immediately after <code>:set()</code>, but listeners haven't been notified yet.</p>
+
+<pre><code><span class="kw">local</span> v = Stream.<span class="fn">Value</span>(<span class="num">0</span>)
+v:<span class="fn">set</span>(<span class="num">1</span>)
+v:<span class="fn">set</span>(<span class="num">2</span>)
+v:<span class="fn">set</span>(<span class="num">3</span>)
+<span class="cm">-- Listeners fire once with oldValue=0, newValue=3</span></code></pre>
+
+
+<!-- ═══════════════════════════════════════════════ TYPES ═══ -->
+<h2 id="types">Type Reference <a class="anchor" href="#types">#</a></h2>
+
+<pre><code><span class="kw">export type</span> <span class="ty">StreamValue</span> = {
+    get: (self: StreamValue) <span class="op">-></span> <span class="ty">any</span>,
+    set: (self: StreamValue, value: <span class="ty">any</span>) <span class="op">-></span> (),
+    Destroy: (self: StreamValue) <span class="op">-></span> (),
+}
+
+<span class="kw">export type</span> <span class="ty">StreamComputedValue</span> = {
+    get: (self: StreamComputedValue) <span class="op">-></span> <span class="ty">any</span>,
+    Destroy: (self: StreamComputedValue) <span class="op">-></span> (),
+}
+
+<span class="kw">export type</span> <span class="ty">StreamObject</span> = StreamValue | StreamComputedValue
+
+<span class="kw">export type</span> <span class="ty">StreamScope</span> = {
+    Add: &lt;T&gt;(self: StreamScope, item: T) <span class="op">-></span> T,
+    InnerScope: (self: StreamScope, category: <span class="ty">string?</span>, displayName: <span class="ty">string?</span>) <span class="op">-></span> StreamScope,
+    Value: (self: StreamScope, value: <span class="ty">any</span>) <span class="op">-></span> StreamValue,
+    Computed: (self: StreamScope, callback: () <span class="op">-></span> <span class="ty">any</span>) <span class="op">-></span> StreamComputedValue,
+    Bind: (self: StreamScope, target: Instance | table) <span class="op">-></span> (PropertiesTable) <span class="op">-></span> Disconnect,
+    Observe: (self: StreamScope, target: StreamObject, callback: ObserveCallback) <span class="op">-></span> Disconnect,
+    Listen: (self: StreamScope, target: <span class="ty">any</span>, args: <span class="ty">any?</span>) <span class="op">-></span> <span class="ty">any</span>,
+    FromProperty: (self: StreamScope, instance: Instance, prop: <span class="ty">string</span>) <span class="op">-></span> StreamValue,
+    FromValueBase: (self: StreamScope, valueBase: ValueBase) <span class="op">-></span> StreamValue,
+    FromAttribute: (self: StreamScope, instance: Instance, attr: <span class="ty">string</span>, cb: ChangeCallback?) <span class="op">-></span> StreamValue,
+    Destroy: (self: StreamScope) <span class="op">-></span> (),
+}
+
+<span class="kw">type</span> <span class="ty">Disconnect</span> = () <span class="op">-></span> ()
+<span class="kw">type</span> <span class="ty">ChangeCallback</span> = (oldValue: <span class="ty">any</span>, newValue: <span class="ty">any</span>) <span class="op">-></span> ()
+<span class="kw">type</span> <span class="ty">ObserveCallback</span> = (value: <span class="ty">any</span>) <span class="op">-></span> Disconnect?</code></pre>
+
+<hr>
+<p style="text-align:center;color:var(--text-3);font-size:13px;padding-top:20px">Stream — Released under the MIT License</p>
+
+</main>
+</div>
+
+<script>
+const links = document.querySelectorAll('.sidebar-link');
+const sections = [];
+links.forEach(link => {
+  const id = link.getAttribute('href')?.replace('#','');
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) sections.push({ el, link });
+  }
+});
+function updateActive() {
+  let current = sections[0];
+  const scrollY = window.scrollY + 80;
+  for (const s of sections) {
+    if (s.el.offsetTop <= scrollY) current = s;
+  }
+  links.forEach(l => l.classList.remove('active'));
+  if (current) current.link.classList.add('active');
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+links.forEach(link => {
+  link.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
