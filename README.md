@@ -4,7 +4,7 @@
 
 **A reactive state library for Roblox**
 
-[Documentation](https://TylerAtStarboard.github.io/stream) · [Example Place](StreamExamplePlace.rbxl)
+[Documentation](https://github.com/TylerAtStarboard/Stream/blob/main/docs/index.html)) · [Example Place](StreamExamplePlace.rbxl)
 
 ---
 
