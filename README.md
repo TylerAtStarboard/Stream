@@ -67,7 +67,7 @@ Open `StreamExamplePlace.rbxl` in Studio to see Stream in action with the debugg
 
 Full API reference, examples, and debugger guide:
 
-**[https://yourusername.github.io/stream](https://yourusername.github.io/stream)**
+**[https://TylerAtStarboard.github.io/stream](https://yourusername.github.io/stream)**
 
 ## License
 
