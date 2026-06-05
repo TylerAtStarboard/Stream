@@ -45,7 +45,7 @@ Add to your `wally.toml`:
 
 ```toml
 [dependencies]
-Stream = "yourusername/stream@1.0.0"
+Stream = "TylerAtStarboard/stream@1.0.0"
 ```
 
 Then run:
