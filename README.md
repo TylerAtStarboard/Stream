@@ -15,7 +15,9 @@
 Stream is a simple and small reactive state library for Roblox that I built for my games, inspired by libraries like [Fusion](https://elttob.uk/Fusion/0.2/). It gives you **values** that hold state, **computeds** that derive from them automatically, and **scopes** that clean everything up when you're done. It also ships with a built-in [Iris](https://github.com/SirMallard/Iris) debugger for inspecting your reactive graph at runtime.
 
 <div align="center">
-<img src="docs/debugger.png" alt="Stream Debugger" width="520">
+
+<img width="1568" height="1121" alt="ApplicationFrameHost_H9mL0Cpyfc" src="https://github.com/user-attachments/assets/d05c45e7-2980-41b3-a563-97e32f5b6396" />
+
 </div>
 
 
