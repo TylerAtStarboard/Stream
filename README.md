@@ -27,6 +27,7 @@ Stream is **not** a UI library. I don't enjoy creating UI entirely in code, so i
 
 ### "How does this compare to"
 I don't intend to benchmark Stream against the libraries mentioned above, or compete with them — they serve different use cases with only some overlapping behavior.
+Nevertheless, I hope some developers find Stream useful :)
 
 
 ## Quick Example
